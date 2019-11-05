@@ -1,6 +1,6 @@
-const BtnClickDelay = 1000, // in ms
-    BtnPressDelay = 1000;
-let lastKey,
+const BtnClickDelay = 500, // in ms
+    BtnPressDelay = 750;
+let lastButton,
     typedResElem;
 
 const print = (type, tempChar = '') => {
@@ -29,7 +29,12 @@ const ButtonEl = function (el) {
     this.onClickFn = () => {
         if (!this.isLongPressed) {
             clearTimeout(this.clickTimeout);
-            lastKey = this.key;
+            if (typeof lastButton !== 'undefined' && lastButton.key !== this.key) {
+                clearTimeout(lastButton.clickTimeout);
+                print('newChar', lastButton.tempChar);
+                lastButton.tempChar = '';
+            }
+            lastButton = this;
             this.clickCount = (new Date().getTime() - this.lastClickTime <= BtnClickDelay) || !this.clickCount
                 ? this.clickCount + 1 : 1;
             this.lastClickTime = new Date();
@@ -37,7 +42,8 @@ const ButtonEl = function (el) {
             this.tempChar = this.dictionary[this.clickCount - 1];
             this.clickTimeout = setTimeout(() => {
                 print('newChar', this.tempChar);
-            }, BtnClickDelay)
+                this.tempChar = '';
+            }, BtnClickDelay);
         }
     };
     this.longPressFn = () => {
